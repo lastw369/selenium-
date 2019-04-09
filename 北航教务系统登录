@@ -1,0 +1,53 @@
+#!/usr/local/bin/python3
+# coding=utf-8
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+class JiaowuSpider(object):
+    # 类的初始化
+    def __init__(self, usr, passwd):
+        self.url = 'https://sso.buaa.edu.cn/login?service=http%3A%2F%2F10.200.21.61%3A7001%2Fieas2.1%2Fwelcome'
+        self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(self.driver, 10)
+        self.usr = usr
+        self.passwd = passwd
+  
+    # 登录函数
+    def run(self):
+        self.driver.get(self.url)
+        try:
+            
+            # 输入账号
+            usr_element = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="username"]'))
+            )
+            usr_element.send_keys(self.usr)
+            
+            # 输入密码
+            passwd_element = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="password"]'))
+            )
+            passwd_element.send_keys(self.passwd)
+            
+            # 点击登录
+            login_element = self.wait.until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="fm1"]/div[3]/input[4]'))
+            )
+            login_element.click()
+        
+        except Exception:
+            self.driver.quit()
+            print("FAIL!!!")
+
+
+
+if __name__ == "__main__":
+    usr = intput("输入你的账号：")
+    passwd = input("输入你的密码：")
+
+    spider = JiaowuSpider(usr, passwd)
+    spider.run()
+
