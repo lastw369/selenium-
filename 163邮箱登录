@@ -1,0 +1,58 @@
+# coding=utf-8
+import time
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+class WySpider(object):
+    def __init__(self, usr, passwd):
+        self.usr = usr
+        self.passwd = passwd
+        self.driver = webdriver.Chrome()
+        self.wait = WebDriverWait(self.driver, 10)
+
+    def run(self):
+        self.driver.get('https://mail.163.com/')
+        try:
+            self.wait.until(
+                EC.presence_of_element_located((By.XPATH, '//*[@id="lbNormal"]'))
+            ).click()
+            
+            # 防止页面还没有加载出来，先暂定进程
+            time.sleep(3) 
+            
+            # 解决了 iframe动态变化的时候，无法抓取iframe 的问题
+            iframe_element = self.driver.find_element_by_xpath('//div[@id="loginDiv"]/iframe')
+            self.driver.switch_to.frame(iframe_element)
+            
+            # 抓取账号输入栏
+            usr_element = self.driver.find_element_by_name('email')
+            usr_element.clear()
+            usr_element.send_keys(self.usr)
+            
+            # 抓取密码输入栏
+            passwd_element = self.wait.until(
+                EC.presence_of_element_located((By.NAME, 'password'))
+            )
+            passwd_element.clear()
+            passwd_element.send_keys(self.passwd)
+            
+            # 点击登陆键
+            self.wait.until(
+                EC.presence_of_element_located((By.ID, 'dologin'))
+            ).click()
+        
+        # 抓取运行中的错误
+        except Exception:
+            self.driver.quit()
+            print("ad")
+
+
+if __name__ == '__main__':
+    usr = input('输入账号:')
+    passwd = input('输入密码:')
+
+    spider = WySpider(usr, passwd)
+    spider.run()
