@@ -1,0 +1,52 @@
+import requests
+from lxml import etree
+
+
+class Login(object):
+    def __init__(self, usr, passwd):
+        self.login_url = 'https://github.com/login'
+        self.post_url = 'https://github.com/session'
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36',
+            'Referer': 'https://github.com/login',
+            'Host': 'github.com'
+        }
+        self.session = requests.Session()
+
+    def login_GitHub(self):
+        data = {
+            'commit': 'Sign in',
+            'utf8': '✓',
+            'authenticity_token': self.get_token(),
+            'login': '1404293933@qq.com',
+            'password': 'liuhanyu258369',
+            'webauthn-support' : 'supported'
+        }
+        response = self.session.post(url=self.post_url, data=data, headers=self.headers)
+
+        print(response.status_code)
+        if response.status_code == 200:
+            print("登陆成功")
+        else:
+            print("登录失败")
+
+    def get_token(self):
+        response = self.session.get(url=self.login_url, headers=self.headers)
+        html = etree.HTML(response.content.decode())
+        token = html.xpath('//input[@name="authenticity_token"]/@value')[0]
+        return token
+
+    def get_info(self):
+        response = self.session.get(url='https://github.com/', headers=self.headers)
+        html = etree.HTML(response.content.decode())
+        info = html.xpath('/html/body/div[4]/div/aside[2]/div[2]/p/@itemprop')
+        return info
+
+
+if __name__ == '__main__':
+    email = '1404293933@qq.com'
+    password = 'liuhanyu258369'
+
+    login = Login(email, password)
+    login.login_GitHub()
+    print(login.get_info())
